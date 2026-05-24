@@ -209,7 +209,10 @@ for (long i = 0; i < N; i++) {
 ## 关联知识
 
 - **下一个实验**：[02-critical-atomic-reduction](../02-critical-atomic-reduction/) — 三种同步方式的性能对比（critical 会慢 100 倍）
-- **理论补充**：Bakhvalov《现代 CPU 性能分析与优化》第 7 章"内存层次" — 解释为什么会撞内存带宽墙
+- **理论补充**：
+  - Bakhvalov《现代 CPU 性能分析与优化》第 8 章"优化内存访问" — 解释内存带宽墙
+  - 同书第 3 章"CPU 微体系结构" — 解释 P-core/E-core 加速差异
+  - 同书第 13 章"优化多线程应用" — false sharing、NUMA、多线程扩展性
 
 ## 文件清单
 

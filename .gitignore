@@ -1,13 +1,38 @@
-# 编译产物
+# 编译产物（任何没有扩展名的可执行文件）
 *.o
 *.out
 *.exe
-task1
-task2
-task*
-!task*.c
+
+# C 源码以外的编译产物
+# 通用规则：忽略所有可执行文件（Linux 下没扩展名）
+# 但保留 .c .h .sh .md 等明确文件
+*
+!*/
+!*.c
+!*.h
+!*.cpp
+!*.hpp
+!*.md
+!*.sh
+!*.py
+!*.txt
+!*.json
+!*.toml
+!Makefile
+!makefile
+!*.gitignore
+!*.gitkeep
+!LICENSE
+!README*
 
 # 编辑器临时文件
+.vscode/
+.idea/
 *.swp
 *.swo
-.vscode/
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+EOF

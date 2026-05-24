@@ -1,0 +1,32 @@
+=== Threads = 1 ===
+Serial:       sum=85714284, time=0.109 s
+Parallel:     sum=85714284, time=0.094 s
+OK: results match, speedup = 1.16x
+=== Threads = 2 ===
+Serial:       sum=85714284, time=0.109 s
+Parallel:     sum=85714284, time=0.049 s
+OK: results match, speedup = 2.22x
+=== Threads = 4 ===
+Serial:       sum=85714284, time=0.109 s
+Parallel:     sum=85714284, time=0.025 s
+OK: results match, speedup = 4.27x
+=== Threads = 8 ===
+Serial:       sum=85714284, time=0.110 s
+Parallel:     sum=85714284, time=0.025 s
+OK: results match, speedup = 4.46x
+=== Threads = 16 ===
+Serial:       sum=85714284, time=0.109 s
+Parallel:     sum=85714284, time=0.014 s
+OK: results match, speedup = 7.57x
+=== Threads = 24 ===
+Serial:       sum=85714284, time=0.109 s
+Parallel:     sum=85714284, time=0.011 s
+OK: results match, speedup = 9.45x
+=== Threads = 32 ===
+Serial:       sum=85714284, time=0.110 s
+Parallel:     sum=85714284, time=0.011 s
+OK: results match, speedup = 10.39x
+=== Threads = 48 ===
+Serial:       sum=85714284, time=0.109 s
+Parallel:     sum=85714284, time=0.015 s
+OK: results match, speedup = 7.26x

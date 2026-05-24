@@ -1,0 +1,13 @@
+# 编译产物
+*.o
+*.out
+*.exe
+task1
+task2
+task*
+!task*.c
+
+# 编辑器临时文件
+*.swp
+*.swo
+.vscode/

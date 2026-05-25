@@ -15,6 +15,7 @@
 !*.md
 !*.sh
 !*.py
+!*.png
 !*.txt
 !*.json
 !*.toml

@@ -71,9 +71,21 @@ OK: results match, speedup = 9.99x
 
 ### 1. 加速比远低于线程数
 
-32 个线程只换来 10x 加速。理论极限是 32x，实际只达到 31%。
+32 个线程只换来 10x 加速，48 线程反而崩塌到 5.75x。
+这条曲线符合 **通用可扩展性法则 (Universal Scalability Law)**：
 
-**原因**：这个循环每次迭代只做"一次内存读 + 一次比较 + 一次加法"，工作量极轻，**瓶颈在内存带宽而非 CPU 算力**。多线程不能让 DDR5 内存条变得更快。
+  Speedup(n) = n / [1 + α(n-1) + β·n(n-1)]
+
+  α (争用系数)：多线程抢同一资源（内存带宽、锁、cache line）
+  β (一致性系数)：线程间状态同步开销
+
+实验中观察到三个阶段：
+- 1-8 线程：α 项主导，加速接近线性
+- 16-32 线程：α 接近饱和，达到性能平台
+- 48 线程：β 项 n² 增长，性能反向退化
+
+理论支撑：Neil Gunther, *Universal Scalability Law*
+书内章节：Bakhvalov 第 13 章 优化多线程应用
 
 ### 2. 16 线程后存在明显拐点
 
@@ -206,20 +218,59 @@ for (long i = 0; i < N; i++) {
 - [ ] 在 NUMA 多 socket 系统上 `reduction` 的性能特征
 - [ ] `reduction` vs 手动写私有变量 + critical 合并，性能差异有多大
 
-## 关联知识
-
-- **下一个实验**：[02-critical-atomic-reduction](../02-critical-atomic-reduction/) — 三种同步方式的性能对比（critical 会慢 100 倍）
-- **理论补充**：
-  - Bakhvalov《现代 CPU 性能分析与优化》第 8 章"优化内存访问" — 解释内存带宽墙
-  - 同书第 3 章"CPU 微体系结构" — 解释 P-core/E-core 加速差异
-  - 同书第 13 章"优化多线程应用" — false sharing、NUMA、多线程扩展性
-
 ## 文件清单
 
 ```
 01-reduction/
 ├── README.md                        ← 本文件
 ├── task1.c                          ← 实验代码
-└── data/
-    └── thread-scan-results.txt      ← 原始扫描输出
+├── data/
+│   └── thread-scan-results.txt      ← 原始扫描输出
+└── analysis/
+    ├── usl_fit.py                   ← USL 模型拟合脚本
+    ├── requirements.txt             ← Python 依赖
+    └── usl_curve.png                ← 拟合曲线图（脚本生成）
 ```
+
+## 数据分析：USL 拟合
+
+用 Universal Scalability Law 拟合扩展曲线：
+
+```bash
+cd analysis
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python3 usl_fit.py
+```
+
+拟合结果：
+
+| 参数 | 数值 | 物理意义 |
+|------|------|---------|
+| α | 0.0420 | 多线程资源争用系数 |
+| β | 0.0016 | 线程间一致性维护系数（n² 影响） |
+| R² | 0.87 | 模型匹配度 |
+| 理论峰值 | 24 线程 / 8.47x | USL 预测最优点 |
+| 实测峰值 | 32 线程 / 9.99x | 真实数据峰值 |
+
+### 模型与实测的偏差分析
+
+R² = 0.87 表明 USL 抓到了主要趋势，但有两处系统性偏差：
+
+**1. 24-32 线程：实测高于模型**
+
+USL 假设线程争用同质资源池，但 i9-14900k 是异构架构
+（8 P-core × 2HT + 16 E-core）。24→32 线程时调度器开始填满
+E-core 资源池，相当于"扩容"，违反 USL 同质假设。
+
+**2. 48 线程：实测低于模型**
+
+USL 预测的下降是平滑 O(n²)，但超过物理线程数（32）后触发了
+新的开销机制：上下文切换、cache ping-pong、调度器抖动。
+这些"突变"不在 USL 描述范围内。
+
+### 结论
+
+USL 是描述并行扩展性的有效一阶模型，要完整解释异构 CPU 上的
+真实扩展曲线，需要叠加架构感知的修正项。
